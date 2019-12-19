@@ -5,8 +5,8 @@ import math
 
 
 class Field:
-    WIDTH = 1000
-    HEIGHT = 1000
+    WIDTH = 800
+    HEIGHT = 800
 
 
 class Coordinate():
@@ -23,7 +23,7 @@ class Bird():
     NUM = 30
     RADIAN = 10
     SPEED = 4
-    VIEW = 100
+    VIEW = 150
 
     @staticmethod
     def setup():
@@ -46,7 +46,12 @@ class Bird():
         self.v3 = Coordinate()
 
     def find_neighbors(self):
-        self.neighbors = Bird.birds
+        # self.neighbors = Bird.birds
+        self.neighbors = [agent for agent in self.birds if agent is not self and self.calc_distance(agent) <= self.view]
+
+    # 距離の計算
+    def calc_distance(self, target):
+        return math.sqrt((target.x - self.x) ** 2 + (target.y - self.y) ** 2)
 
     # 結合
     def cohesion(self):
@@ -70,12 +75,8 @@ class Bird():
             if dist == 0:
                 continue
             if dist < personal_space:
-                self.v2.x -= (bird.x - self.x)
-                self.v2.y -= (bird.y - self.y)
-
-    # 距離の計算
-    def calc_distance(self, target):
-        return math.sqrt((target.x - self.x) ** 2 + (target.y - self.y) ** 2)
+                self.v2.x -= (bird.x - self.x) / 2
+                self.v2.y -= (bird.y - self.y) / 2
 
     # 整列
     def alignment(self):
@@ -146,12 +147,10 @@ def main():
     canvas = Canvas(root, width=Field.WIDTH, height=Field.HEIGHT)
     canvas.pack()
 
-    for bird in Bird.birds:
-        bird.find_neighbors()
-
     def animate():
         canvas.delete("all")
         for bird in Bird.birds:
+            bird.find_neighbors()
             bird.draw(canvas)
         root.after(20, animate)
 
