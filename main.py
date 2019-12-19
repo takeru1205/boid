@@ -1,7 +1,8 @@
+import math
 import random
 from statistics import mean
 from tkinter import *
-import math
+import argparse
 
 
 class Field:
@@ -10,7 +11,6 @@ class Field:
 
 
 class Coordinate():
-
     def __init__(self):
         self.reset()
 
@@ -26,18 +26,19 @@ class Bird():
     VIEW = 150
 
     @staticmethod
-    def setup():
-        Bird.birds = [Bird() for _ in range(Bird.NUM)]
+    def setup(args):
+        Bird.birds = [Bird(args) for _ in range(Bird.NUM)]
 
-    def __init__(self):
+    def __init__(self, args):
         self.x = random.randint(0, Field.WIDTH)
         self.y = random.randint(0, Field.HEIGHT)
         self.vx = random.randint(-self.SPEED, self.SPEED)
         self.vy = random.randint(-self.SPEED, self.SPEED)
         self.view = self.VIEW
-        self.r1 = 1.0  # cohesion coefficient
-        self.r2 = 0.8  # separation coefficient
-        self.r3 = 0.3  # alignment coefficient
+        self.r1 = args.r1
+        self.r2 = args.r2
+        self.r3 = args.r3
+        self.center_pull = args.center_pull
 
         self.neighbors = None
 
@@ -46,7 +47,6 @@ class Bird():
         self.v3 = Coordinate()
 
     def find_neighbors(self):
-        # self.neighbors = Bird.birds
         self.neighbors = [agent for agent in self.birds if agent is not self and self.calc_distance(agent) <= self.view]
 
     # 距離の計算
@@ -57,13 +57,12 @@ class Bird():
     def cohesion(self):
         if not self.neighbors:
             return
-        center_pull_coeff = 300
 
         self.v1.x = mean([agent.x for agent in self.neighbors if agent is not self])
         self.v1.y = mean([agent.y for agent in self.neighbors if agent is not self])
 
-        self.v1.x = (self.v1.x - self.x) / center_pull_coeff
-        self.v1.y = (self.v1.y - self.y) / center_pull_coeff
+        self.v1.x = (self.v1.x - self.x) / self.center_pull
+        self.v1.y = (self.v1.y - self.y) / self.center_pull
 
     # 離脱
     def separation(self):
@@ -135,12 +134,12 @@ class Bird():
         self.clear_movement()
         self.step()
         self.update()
-        drawer.create_oval(self.x - Bird.RADIAN, self.y - Bird.RADIAN, self.x+Bird.RADIAN, self.y+Bird.RADIAN)
+        drawer.create_oval(self.x - Bird.RADIAN, self.y - Bird.RADIAN, self.x + Bird.RADIAN, self.y + Bird.RADIAN)
         drawer.create_line(self.x, self.y, self.x + self.vx * 3, self.y + self.vy * 3)
 
 
-def main():
-    Bird.setup()
+def main(args):
+    Bird.setup(args)
 
     root = Tk()
 
@@ -159,4 +158,11 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='Boids Model parameters')
+    parser.add_argument('--r1', type=float, default=1.0, help='cohesion coefficient')
+    parser.add_argument('--r2', type=float, default=0.8, help='separation coefficient')
+    parser.add_argument('--r3', type=float, default=0.3, help='alignment coefficient')
+    parser.add_argument('--center-pull', type=int, default=300,
+                        help='center pull coefficient for means of neighbors coordinante')
+    args = parser.parse_args()
+    main(args)
