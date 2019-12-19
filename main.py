@@ -1,13 +1,13 @@
+import argparse
 import math
 import random
 from statistics import mean
 from tkinter import *
-import argparse
 
 
 class Field:
-    WIDTH = 800
-    HEIGHT = 800
+    WIDTH = 1000
+    HEIGHT = 1000
 
 
 class Coordinate():
@@ -23,7 +23,6 @@ class Bird():
     NUM = 30
     RADIAN = 10
     SPEED = 4
-    VIEW = 150
 
     @staticmethod
     def setup(args):
@@ -34,11 +33,11 @@ class Bird():
         self.y = random.randint(0, Field.HEIGHT)
         self.vx = random.randint(-self.SPEED, self.SPEED)
         self.vy = random.randint(-self.SPEED, self.SPEED)
-        self.view = self.VIEW
         self.r1 = args.r1
         self.r2 = args.r2
         self.r3 = args.r3
         self.center_pull = args.center_pull
+        self.view = args.view
 
         self.neighbors = None
 
@@ -164,5 +163,6 @@ if __name__ == '__main__':
     parser.add_argument('--r3', type=float, default=0.3, help='alignment coefficient')
     parser.add_argument('--center-pull', type=int, default=300,
                         help='center pull coefficient for means of neighbors coordinante')
+    parser.add_argument('--view', type=int, default=150, help='view of each birds')
     args = parser.parse_args()
     main(args)
